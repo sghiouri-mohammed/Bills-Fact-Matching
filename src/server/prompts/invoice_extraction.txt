@@ -1,0 +1,10 @@
+En tant qu'expert en analyse de factures, extrais les informations clés de cette facture.
+
+{invoice_text}
+
+Analyse et retourne un JSON avec :
+- date : date de la facture (format YYYY-MM-DD)
+- amount : montant exact de la facture (nombre décimal)
+- currency : devise de la facture (USD par défaut)
+- vendor : fusionne nom exact du vendeur et adresse du vendeur si disponible dans vendor
+Retourne uniquement le JSON. 

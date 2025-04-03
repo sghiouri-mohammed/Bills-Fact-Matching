@@ -1,0 +1,11 @@
+ocr-nanonets-wrapper
+pandas
+fuzzywuzzy
+streamlit
+requests==2.31.0
+python-dotenv==1.0.1
+numpy>=1.24.0
+pillow>=10.0.0
+mistralai==0.0.10
+python-dateutil==2.8.2 
+scikit-learn
