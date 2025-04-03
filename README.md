@@ -60,7 +60,7 @@ Suivez ces étapes pour configurer et lancer le projet :
     *(Note : Assurez-vous que `requirements.txt` contient au moins `nanonets-ocr` et `streamlit` si vous utilisez Streamlit).*
 
 4.  **Configurer vos clés API et paramètres** :
-    *   Ouvrez le fichier `.env`.
+    *   Changez le nom du fichier `.env.example` en `.env`.
     *   Remplacez la valeur de `MISTRAL_API_KEY` par votre propre clés.
     ```python:.env
     # Configuration de l'API Mistral
