@@ -71,8 +71,12 @@ def display_results(st, invoice_path=None, invoice={}, matching_results=[], conf
             
             # Display confusion matrix
             st.markdown("### Matrice de Confusion")
+            
+            # Générer une clé unique basée sur le chemin du fichier
+            unique_key = f"plot_{os.path.basename(invoice_path).replace('.', '_')}"
+            
             fig = create_confusion_matrix_plot(confusion_results['confusion_matrix'])
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, key=unique_key)
 
     with col2:
         extracted_data = extraction_info.get('json', {})

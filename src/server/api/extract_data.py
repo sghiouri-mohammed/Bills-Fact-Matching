@@ -44,50 +44,61 @@ class MistralClient:
             "Accept": "application/json"
         }
 
-    def _make_request_with_retry(self, messages: List[Dict[str, Any]], max_retries: int = MAX_RETRIES) -> Any:
-        """
-        Fait une requête à l'API avec retry en cas d'erreur
-        """
-        for attempt in range(max_retries):
+    def _make_request_with_retry(self, messages: List[Dict[str, Any]], max_attempts=3):
+        """Make API request with retry logic."""
+        attempt = 0
+        
+        while attempt < max_attempts:
             try:
-                logger.info(f"Tentative {attempt + 1}/{max_retries} d'appel à l'API Mistral")
-                #logger.info(f"Messages envoyés: {json.dumps(messages, indent=2, ensure_ascii=False)}")
-                
-                payload = {
-                    "model": MISTRAL_MODEL,
-                    "messages": messages,
-                    "temperature": TEMPERATURE,
-                    "max_tokens": MAX_TOKENS
-                }
+                attempt += 1
+                logging.info(f"Tentative {attempt}/{max_attempts} d'appel à l'API Mistral")
                 
                 response = requests.post(
                     f"{self.base_url}/chat/completions",
                     headers=self.headers,
-                    json=payload,
+                    json={
+                        "model": MISTRAL_MODEL,
+                        "messages": messages,
+                        "temperature": TEMPERATURE,
+                        "max_tokens": MAX_TOKENS
+                    },
                     timeout=REQUEST_TIMEOUT
                 )
                 
-                if response.status_code != 200:
-                    logger.error(f"Erreur API: {response.status_code} - {response.text}")
-                    raise Exception(f"Status: {response.status_code}. Message: {response.text}")
-                
-                result = response.json()
-                logger.info("Réponse reçue de l'API Mistral")
-                logger.info(f"Réponse: {json.dumps(result, indent=2, ensure_ascii=False)}")
-                
-                if not result.get('choices') or not result['choices'][0].get('message', {}).get('content'):
-                    raise Exception("Réponse invalide de l'API")
+                if response.status_code == 200:
+                    logging.info("Réponse reçue de l'API Mistral")
+                    logging.info(f"Réponse: {response.text}")
+                    return response.json()
+                else:
+                    logging.error(f"Erreur API: {response.status_code} - {response.text}")
                     
-                return result
+                    # Traiter spécifiquement les erreurs de rate limit
+                    if response.status_code == 429:
+                        wait_time = 5 * (2 ** attempt)  # Attente exponentielle: 5, 10, 20 secondes
+                        logging.error(f"Erreur lors de l'appel à l'API (tentative {attempt}): Status: {response.status_code}. Message: {response.text}")
+                        
+                        if attempt < max_attempts:
+                            logging.info(f"Attente de {wait_time} secondes avant la prochaine tentative")
+                            time.sleep(wait_time)
+                        else:
+                            logging.error("Nombre maximum de tentatives atteint")
+                            raise Exception(f"Status: {response.status_code}. Message: {response.text}")
+                    else:
+                        logging.error(f"Erreur lors de l'appel à l'API: Status: {response.status_code}. Message: {response.text}")
+                        raise Exception(f"Status: {response.status_code}. Message: {response.text}")
+            
+            except requests.exceptions.RequestException as e:
+                logging.error(f"Erreur de connexion à l'API (tentative {attempt}): {e}")
                 
-            except Exception as e:
-                logger.error(f"Erreur lors de l'appel à l'API (tentative {attempt + 1}): {str(e)}")
-                if attempt == max_retries - 1:
-                    logger.error("Nombre maximum de tentatives atteint")
+                if attempt < max_attempts:
+                    wait_time = 2 ** attempt
+                    logging.info(f"Attente de {wait_time} secondes avant la prochaine tentative")
+                    time.sleep(wait_time)
+                else:
+                    logging.error("Nombre maximum de tentatives atteint")
                     raise e
-                wait_time = 2 ** attempt
-                logger.info(f"Attente de {wait_time} secondes avant la prochaine tentative")
-                time.sleep(wait_time)
+        
+        raise Exception("Nombre maximum de tentatives atteint sans succès")
 
     def send_message(self, messages: List[Dict[str, Any]]) -> str:
         """
