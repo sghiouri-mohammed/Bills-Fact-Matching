@@ -3,7 +3,8 @@ from src.server.api.matching import get_matching_rows
 from src.server.api.upload import upload_file
 from src.server.api.download import download_file
 from src.server.api.delete import delete_file
-from src.server.api.benchmark import benchmark
+from src.server.api.benchmark import benchmark, calculate_confusion_matrix
+import pandas as pd
 
 class APIService:
     def __init__(self):
@@ -26,4 +27,26 @@ class APIService:
     
     def benchmark(self, df, df_predicted):
         return benchmark(df, df_predicted)
+
+    def calculate_confusion_matrix(self, csv_file_path, matching_results, image_filename):
+        """
+        Calculate confusion matrix for matching results.
+        
+        Args:
+            csv_file_path: Path to the CSV file
+            matching_results: List of matching results
+            image_filename: Name of the image file
+            
+        Returns:
+            dict: Dictionary containing confusion matrix and metrics
+        """
+        try:
+            # Read CSV file
+            df = pd.read_csv(csv_file_path)
+            
+            # Calculate confusion matrix
+            return calculate_confusion_matrix(df, matching_results, image_filename)
+        except Exception as e:
+            print(f"Error calculating confusion matrix: {e}")
+            return None
 

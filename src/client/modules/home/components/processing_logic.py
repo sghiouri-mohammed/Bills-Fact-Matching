@@ -4,6 +4,7 @@ import time
 import logging
 from src.client.modules.home.components.results_display import display_results
 import pandas as pd
+from src.server.config.paths import CSV_DIR, IMAGES_DIR
         
 
 def process_upload_and_extraction(bank_statement, invoices):
@@ -20,10 +21,16 @@ def process_upload_and_extraction(bank_statement, invoices):
             st.markdown("<hr>", unsafe_allow_html=True)
             status_placeholder.info("🔄 Uploading files and extracting data...")
     
-            # Display single result
-            st.header("📊 Matching Results")
+            # Display header for all results
+            st.header("📊 Analyse des Factures")
+            st.markdown("""
+            Pour chaque facture, nous analysons :
+            - **TP (True Positive)** : Facture correctement matchée
+            - **TN (True Negative)** : Absence de match correctement identifiée
+            - **FP (False Positive)** : Match incorrect proposé
+            - **FN (False Negative)** : Match manqué
+            """)
 
-            
             st.session_state.can_upload = False
             #st.session_state.is_slider_changed = False
             
@@ -32,7 +39,7 @@ def process_upload_and_extraction(bank_statement, invoices):
             if (not st.session_state.is_slider_changed or not st.session_state.invoices_list) or not st.session_state.is_service_cleared:
                 # Upload bank statement
                 bank_file = st.session_state.preview_bank_statement
-                bank_statement_path = os.path.join('storage/dataset/csv', bank_file.get('name'))
+                bank_statement_path = os.path.join(CSV_DIR, bank_file.get('name'))
                 st.session_state.server_service.upload_file(bank_statement_path, bank_file.get('read'))
                 st.session_state.bank_statement_path = bank_statement_path
                 st.session_state.list_view = []
@@ -40,9 +47,16 @@ def process_upload_and_extraction(bank_statement, invoices):
                 # Process each invoice sequentially
                 
                 for i, invoice_file in enumerate(st.session_state.preview_invoices):
+                    # Add a separator between invoices
+                    if i > 0:
+                        st.markdown("---")
+                    
+                    # Display invoice number
+                    st.subheader(f"Facture {i+1}/{num_invoices}")
+                    
                     # Upload invoice
                     invoice_name = invoice_file.get('name')
-                    invoice_path = os.path.join('storage/dataset/images', invoice_name)
+                    invoice_path = os.path.join(IMAGES_DIR, invoice_name)
                     st.session_state.server_service.upload_file(invoice_path, invoice_file.get('read'))
                     
                     # Extract data
@@ -181,25 +195,22 @@ def process_matching(invoice_path, invoice_name, invoice_data):
             invoice_data,
             threshold=st.session_state.treshold
         )
-        
-        if not match_list:
-            match_df = pd.DataFrame(match_list)
-            
-            if 'match_score' in match_df.columns: 
-                # Find the maximum value in the 'score' column
-                max_score = match_df['match_score'].max()
 
-                # Get the row(s) where the 'score' column equals the maximum score
-                row_with_max_score = match_df[match_df['match_score'] == max_score]
-                # Method 1: Adding a column with a constant value
-                row_with_max_score['source'] = invoice_name  # Replace 'default_source' with the desired value
-                
-                if not st.session_state.result_list.empty:
-                    st.session_state.result_list =  pd.concat([st.session_state.result_list, row_with_max_score], ignore_index=True)
-            
+        # Calculate confusion matrix
+        confusion_results = None
+        if match_list is not None:
+            confusion_results = st.session_state.server_service.calculate_confusion_matrix(
+                st.session_state.bank_statement_path,
+                match_list,
+                invoice_name
+            )
+
+        if not st.session_state.is_slider_changed:
+            display_results(st, invoice_path, invoice_data, match_list, confusion_results)
 
         return match_list
 
     except Exception as e:
         logging.error(f"Matching Error for {invoice_path}: {e}", exc_info=True)
-        st.error(f"An error occurred during matching for {invoice_path}: {e}") 
+        st.error(f"An error occurred during matching for {invoice_path}: {e}")
+        return [] 

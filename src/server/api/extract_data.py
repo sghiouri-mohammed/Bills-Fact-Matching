@@ -7,6 +7,7 @@ import time
 from typing import Dict, Any, List
 import os
 from dotenv import load_dotenv
+import pandas as pd
 
 from src.server.config.settings import (
     MISTRAL_API_KEY,
@@ -50,7 +51,7 @@ class MistralClient:
         for attempt in range(max_retries):
             try:
                 logger.info(f"Tentative {attempt + 1}/{max_retries} d'appel à l'API Mistral")
-                logger.info(f"Messages envoyés: {json.dumps(messages, indent=2, ensure_ascii=False)}")
+                #logger.info(f"Messages envoyés: {json.dumps(messages, indent=2, ensure_ascii=False)}")
                 
                 payload = {
                     "model": MISTRAL_MODEL,
@@ -183,5 +184,26 @@ def get_extracted_data(image_path: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Error during OCR extraction for {image_path}: {e}", exc_info=True)
         return {"success": False, "error": str(e), "data": None}
+
+# Définir le chemin de base
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def read_csv(file_path):
+    logging.debug(f"Reading CSV file: {file_path}")
+    try:
+        # Construire le chemin complet
+        full_path = os.path.join(BASE_DIR, 'storage', 'dataset', 'csv', file_path)
+        
+        logging.debug(f"Full path to CSV file: {full_path}")
+        if not os.path.exists(full_path):
+            logging.error(f"CSV file not found at {full_path}")
+            return None
+        
+        # Charger le CSV
+        df = pd.read_csv(full_path)
+        return df
+    except Exception as e:
+        logging.error(f"Error reading CSV file: {e}")
+        return None
 
 

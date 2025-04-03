@@ -2,8 +2,44 @@ import os
 import pandas as pd
 import logging
 import time
+import plotly.graph_objects as go
 
-def display_results(st,invoice_path=None, invoice ={}, matching_results=[]):
+def create_confusion_matrix_plot(confusion_matrix):
+    """Create a plotly heatmap for confusion matrix visualization"""
+    labels = ['Négatif', 'Positif']
+    
+    fig = go.Figure(data=go.Heatmap(
+        z=confusion_matrix,
+        x=labels,
+        y=labels,
+        text=[[str(val) for val in row] for row in confusion_matrix],
+        texttemplate="%{text}",
+        textfont={"size": 16},
+        colorscale='RdYlBu',
+        showscale=True
+    ))
+    
+    fig.update_layout(
+        title='Matrice de Confusion',
+        xaxis_title='Prédiction',
+        yaxis_title='Réalité',
+        width=400,
+        height=400
+    )
+    
+    return fig
+
+def display_results(st, invoice_path=None, invoice={}, matching_results=[], confusion_results=None):
+    """
+    Display results including extracted data, matches, and performance metrics.
+    
+    Args:
+        st: Streamlit instance
+        invoice_path: Path to the invoice image
+        invoice: Dictionary containing extracted invoice data
+        matching_results: List of matching results
+        confusion_results: Dictionary containing confusion matrix and metrics
+    """
     extraction_info = invoice
     matching_result = matching_results
     
@@ -15,6 +51,28 @@ def display_results(st,invoice_path=None, invoice ={}, matching_results=[]):
             st.image(invoice_path, caption="Facture", use_container_width=True)
         except Exception as img_err:
             st.error(f"Could not load image {os.path.basename(invoice_path)}: {img_err}")
+
+        # Display performance metrics if available
+        if confusion_results:
+            st.markdown("### 📊 Métriques de Performance")
+            metrics = confusion_results['metrics']
+            
+            # Create three columns for metrics
+            m1, m2, m3, m4 = st.columns(4)
+            
+            with m1:
+                st.metric("Accuracy", f"{metrics['accuracy']:.1f}%")
+            with m2:
+                st.metric("Precision", f"{metrics['precision']:.1f}%")
+            with m3:
+                st.metric("Recall", f"{metrics['recall']:.1f}%")
+            with m4:
+                st.metric("F1-Score", f"{metrics['f1_score']:.1f}%")
+            
+            # Display confusion matrix
+            st.markdown("### Matrice de Confusion")
+            fig = create_confusion_matrix_plot(confusion_results['confusion_matrix'])
+            st.plotly_chart(fig, use_container_width=True)
 
     with col2:
         extracted_data = extraction_info.get('json', {})

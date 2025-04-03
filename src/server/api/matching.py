@@ -4,19 +4,25 @@ import logging
 from datetime import datetime, timedelta
 import re # Import regex for vendor cleaning
 import os
+from src.server.api.benchmark import calculate_confusion_matrix
 
-# Configure basic logging if not already configured elsewhere
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def read_csv(file_path):
-    logging.debug(f"Reading CSV file: {file_path}")
+    logger.debug(f"Reading CSV file: {file_path}")
     try:
         # Load CSV without initial date parsing
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         full_path = os.path.join(base_dir, '..', file_path)
         df = pd.read_csv(full_path)
-        logging.debug(f"CSV DataFrame head before cleaning:\n{df.head()}")
-        logging.debug(f"CSV DataFrame dtypes before cleaning:\n{df.dtypes}")
+        logger.debug(f"CSV DataFrame head before cleaning:\n{df.head()}")
+        logger.debug(f"CSV DataFrame dtypes before cleaning:\n{df.dtypes}")
 
         # Attempt to convert 'date' column to datetime objects after loading
         # errors='coerce' will turn unparseable dates into NaT (Not a Time)
@@ -24,7 +30,7 @@ def read_csv(file_path):
             # Try multiple common date formats
             df['date'] = pd.to_datetime(df['date'], errors='coerce', infer_datetime_format=True)
         else:
-            logging.warning("CSV file does not contain a 'date' column.")
+            logger.warning("CSV file does not contain a 'date' column.")
 
         # Attempt to convert amount, coercing errors to NaN
         if 'amount' in df.columns:
@@ -33,20 +39,20 @@ def read_csv(file_path):
                  df['amount'] = df['amount'].astype(str).str.replace(r'[$,€£¥]', '', regex=True).str.replace(',', '').str.strip()
             df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
         else:
-            logging.warning("CSV file does not contain an 'amount' column.")
+            logger.warning("CSV file does not contain an 'amount' column.")
 
         # Handle potential 'N/A' strings or similar placeholders in other columns if needed
         # Example for vendor: df['vendor'] = df['vendor'].replace(['N/A', 'na', ''], None)
 
 
-        logging.debug(f"CSV DataFrame head after cleaning:\n{df.head()}")
-        logging.debug(f"CSV DataFrame dtypes after cleaning:\n{df.dtypes}") # Check if 'date' is now datetime64[ns]
+        logger.debug(f"CSV DataFrame head after cleaning:\n{df.head()}")
+        logger.debug(f"CSV DataFrame dtypes after cleaning:\n{df.dtypes}") # Check if 'date' is now datetime64[ns]
         return df
     except FileNotFoundError:
-        logging.error(f"CSV file not found at {file_path}")
+        logger.error(f"CSV file not found at {file_path}")
         return None
     except Exception as e:
-        logging.error(f"Failed to read or process CSV {file_path}: {e}", exc_info=True)
+        logger.error(f"Failed to read or process CSV {file_path}: {e}", exc_info=True)
         return None
 
 def normalize_vendor(name):
@@ -92,14 +98,14 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
             # Handle potential 'N/A' strings explicitly
             if invoice_date_str.upper() == 'N/A':
                  invoice_date_obj = None
-                 logging.debug("Invoice date is 'N/A', treating as missing.")
+                 logger.debug("Invoice date is 'N/A', treating as missing.")
             else:
                  invoice_date_obj = datetime.strptime(invoice_date_str, '%Y-%m-%d')
         except ValueError:
-            logging.warning(f"Could not parse invoice date string: '{invoice_date_str}'. Treating as missing.")
+            logger.warning(f"Could not parse invoice date string: '{invoice_date_str}'. Treating as missing.")
             invoice_date_obj = None
     elif invoice_date_str is not None: # Should ideally be string or None
-         logging.warning(f"Unexpected invoice date type: {type(invoice_date_str)}. Treating as missing.")
+         logger.warning(f"Unexpected invoice date type: {type(invoice_date_str)}. Treating as missing.")
          invoice_date_obj = None
 
     # Check if CSV date is valid (not NaT) AND invoice date was successfully parsed
@@ -116,17 +122,17 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
 
             score += date_score * weights['date']
             total_weight += weights['date']
-            logging.debug(f"Date comparison: CSV='{csv_date.strftime('%Y-%m-%d')}', Invoice='{invoice_date_obj.strftime('%Y-%m-%d')}', Diff='{time_difference}', Score={date_score}")
+            logger.debug(f"Date comparison: CSV='{csv_date.strftime('%Y-%m-%d')}', Invoice='{invoice_date_obj.strftime('%Y-%m-%d')}', Diff='{time_difference}', Score={date_score}")
         except Exception as e:
-             logging.error(f"Unexpected error during date comparison: CSV Date={csv_date}, Invoice Date Obj={invoice_date_obj}. Error: {e}", exc_info=True)
+             logger.error(f"Unexpected error during date comparison: CSV Date={csv_date}, Invoice Date Obj={invoice_date_obj}. Error: {e}", exc_info=True)
 
     # Log if skipping
     elif pd.notna(csv_date):
-         logging.debug(f"Skipping date score: Invoice date missing or invalid (Data: {invoice_data.get('date')}) for CSV Date {csv_date.strftime('%Y-%m-%d')}")
+         logger.debug(f"Skipping date score: Invoice date missing or invalid (Data: {invoice_data.get('date')}) for CSV Date {csv_date.strftime('%Y-%m-%d')}")
     elif invoice_date_obj is not None:
-         logging.debug(f"Skipping date score: CSV date missing or invalid (value: {row.get('date', 'N/A')}) for Invoice Date {invoice_date_obj.strftime('%Y-%m-%d')}")
+         logger.debug(f"Skipping date score: CSV date missing or invalid (value: {row.get('date', 'N/A')}) for Invoice Date {invoice_date_obj.strftime('%Y-%m-%d')}")
     else:
-         logging.debug("Skipping date score: Both CSV and Invoice dates are missing or invalid.")
+         logger.debug("Skipping date score: Both CSV and Invoice dates are missing or invalid.")
 
 
     # --- 2. Amount Comparison (Numerical with Tolerance) ---
@@ -136,7 +142,7 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
     # # Handle potential "N/A" string in invoice amount if necessary
     # if isinstance(invoice_amount, str) and invoice_amount.upper() == 'N/A':
     #     invoice_amount = None
-    #     logging.debug("Invoice amount is 'N/A', treating as missing.")
+    #     logger.debug("Invoice amount is 'N/A', treating as missing.")
 
     # # Check if both amounts are valid numbers
     # if pd.notna(csv_amount) and invoice_amount is not None and isinstance(invoice_amount, (int, float)):
@@ -151,16 +157,16 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
     #             amount_score = 0 # Keep it strict for now
     #         score += amount_score * weights['amount']
     #         total_weight += weights['amount']
-    #         logging.debug(f"Amount comparison: CSV='{csv_amount:.2f}', Invoice='{invoice_amount:.2f}', Diff='{abs(csv_amount - invoice_amount):.2f}', Score={amount_score}")
+    #         logger.debug(f"Amount comparison: CSV='{csv_amount:.2f}', Invoice='{invoice_amount:.2f}', Diff='{abs(csv_amount - invoice_amount):.2f}', Score={amount_score}")
     #     except Exception as e:
-    #         logging.error(f"Unexpected error during amount comparison: CSV={csv_amount}, Invoice={invoice_amount}. Error: {e}", exc_info=True)
+    #         logger.error(f"Unexpected error during amount comparison: CSV={csv_amount}, Invoice={invoice_amount}. Error: {e}", exc_info=True)
     # # Log skipping reasons
     # elif pd.notna(csv_amount):
-    #      logging.debug(f"Skipping amount score: Invoice amount missing or invalid (value: {invoice_data.get('amount', 'N/A')}) for CSV Amount {csv_amount:.2f}")
+    #      logger.debug(f"Skipping amount score: Invoice amount missing or invalid (value: {invoice_data.get('amount', 'N/A')}) for CSV Amount {csv_amount:.2f}")
     # elif invoice_amount is not None:
-    #      logging.debug(f"Skipping amount score: CSV amount missing/invalid (value: {row.get('amount', 'N/A')}) for Invoice Amount {invoice_amount:.2f}")
+    #      logger.debug(f"Skipping amount score: CSV amount missing/invalid (value: {row.get('amount', 'N/A')}) for Invoice Amount {invoice_amount:.2f}")
     # else:
-    #     logging.debug("Skipping amount score: Both CSV and Invoice amounts are missing or invalid.")
+    #     logger.debug("Skipping amount score: Both CSV and Invoice amounts are missing or invalid.")
 
 
     # --- 3. Currency Comparison (Case-insensitive Exact Match) ---
@@ -170,7 +176,7 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
     # Handle potential "N/A" string
     if isinstance(invoice_currency, str) and invoice_currency.upper() == 'N/A':
         invoice_currency = None
-        logging.debug("Invoice currency is 'N/A', treating as missing.")
+        logger.debug("Invoice currency is 'N/A', treating as missing.")
     if isinstance(csv_currency, str) and csv_currency.upper() == 'N/A': # Handle in CSV too if possible
         csv_currency = None
 
@@ -188,9 +194,9 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
                  currency_score = 0
             score += currency_score * weights['currency']
             total_weight += weights['currency']
-            logging.debug(f"Currency comparison: CSV='{csv_curr_str}', Invoice='{inv_curr_str}', Score={currency_score}")
+            logger.debug(f"Currency comparison: CSV='{csv_curr_str}', Invoice='{inv_curr_str}', Score={currency_score}")
         except Exception as e:
-            logging.error(f"Unexpected error during currency comparison: CSV={csv_currency}, Invoice={invoice_currency}. Error: {e}", exc_info=True)
+            logger.error(f"Unexpected error during currency comparison: CSV={csv_currency}, Invoice={invoice_currency}. Error: {e}", exc_info=True)
     # Log skipping reasons (optional, can be verbose)
     # ...
 
@@ -202,7 +208,7 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
     # Handle potential "N/A" string
     if isinstance(invoice_vendor, str) and invoice_vendor.upper() == 'N/A':
         invoice_vendor = None
-        logging.debug("Invoice vendor is 'N/A', treating as missing.")
+        logger.debug("Invoice vendor is 'N/A', treating as missing.")
 
     # Check if both vendors are present (not None/NaN and not empty strings after potential cleaning)
     if pd.notna(csv_vendor) and invoice_vendor is not None and isinstance(invoice_vendor, str) and invoice_vendor:
@@ -216,12 +222,12 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
                 vendor_score = fuzz.token_set_ratio(norm_csv_vendor, norm_invoice_vendor)
                 score += vendor_score * weights['vendor']
                 total_weight += weights['vendor']
-                logging.debug(f"Vendor comparison: Norm CSV='{norm_csv_vendor}', Norm Invoice='{norm_invoice_vendor}', Score={vendor_score} (Original CSV='{csv_vendor}', Invoice='{invoice_vendor}')")
+                logger.debug(f"Vendor comparison: Norm CSV='{norm_csv_vendor}', Norm Invoice='{norm_invoice_vendor}', Score={vendor_score} (Original CSV='{csv_vendor}', Invoice='{invoice_vendor}')")
             else:
-                 logging.debug(f"Skipping vendor score: One or both vendors became empty after normalization (CSV: '{norm_csv_vendor}', Invoice: '{norm_invoice_vendor}')")
+                 logger.debug(f"Skipping vendor score: One or both vendors became empty after normalization (CSV: '{norm_csv_vendor}', Invoice: '{norm_invoice_vendor}')")
 
         except Exception as e:
-            logging.error(f"Unexpected error during vendor comparison: CSV='{csv_vendor}', Invoice='{invoice_vendor}'. Error: {e}", exc_info=True)
+            logger.error(f"Unexpected error during vendor comparison: CSV='{csv_vendor}', Invoice='{invoice_vendor}'. Error: {e}", exc_info=True)
     # Log skipping reasons (optional)
     # ...
 
@@ -230,22 +236,22 @@ def calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_toler
     if total_weight > 0:
         # Ensure score doesn't exceed 100 (can happen with rounding if all weights are used and scores are 100)
         final_score = min(100.0, score / total_weight)
-        logging.debug(f"Row calculation finished. Final Score: {final_score:.2f} (Raw Score: {score:.2f}, Total Weight: {total_weight:.2f})")
+        logger.debug(f"Row calculation finished. Final Score: {final_score:.2f} (Raw Score: {score:.2f}, Total Weight: {total_weight:.2f})")
         return round(final_score) # Return rounded score as integer
     else:
-        logging.warning("Could not calculate score for row, total_weight is zero (all comparable fields were missing/invalid).")
+        logger.warning("Could not calculate score for row, total_weight is zero (all comparable fields were missing/invalid).")
         return 0
 
 def find_matching_rows(df, invoice_data, threshold=70):
     """Finds matching rows and adds the match_score column."""
-    logging.debug(f"Finding matching rows with invoice_data: {invoice_data}")
+    logger.debug(f"Finding matching rows with invoice_data: {invoice_data}")
     if df is None or df.empty:
-        logging.warning("DataFrame is empty or None, cannot find matches.")
+        logger.warning("DataFrame is empty or None, cannot find matches.")
         return pd.DataFrame() # Return empty DataFrame
 
     # Ensure invoice_data is not None
     if invoice_data is None:
-        logging.warning("Invoice data is None, cannot calculate scores.")
+        logger.warning("Invoice data is None, cannot calculate scores.")
         return pd.DataFrame()
 
     # Calculate scores using .apply
@@ -255,69 +261,95 @@ def find_matching_rows(df, invoice_data, threshold=70):
             # Pass tolerances defined here (or make them global/configurable)
             return calculate_match_score(row, invoice_data, date_tolerance_days=1, amount_tolerance=0.01)
         except Exception as e:
-            logging.error(f"Error calculating score for row: {row.to_dict()}. Error: {e}", exc_info=True)
+            logger.error(f"Error calculating score for row: {row.to_dict()}. Error: {e}", exc_info=True)
             return 0 # Return 0 score if calculation fails for a row
 
     df['match_score'] = df.apply(lambda row: safe_calculate_score(row, invoice_data), axis=1)
-    logging.debug(f"Match scores calculated (showing first 5):\n{df['match_score'].head()}")
+    logger.debug(f"Match scores calculated (showing first 5):\n{df['match_score'].head()}")
 
     # Filter by threshold
     matching_df = df[df['match_score'] >= threshold].copy() # Use .copy() to avoid SettingWithCopyWarning
-    logging.debug(f"Matching rows found (above threshold {threshold}):\n{matching_df}")
+    logger.debug(f"Matching rows found (above threshold {threshold}):\n{matching_df}")
 
     # Sort by score descending to get best match first
     matching_df.sort_values(by='match_score', ascending=False, inplace=True)
 
     return matching_df
 
-def get_matching_rows(file_path, invoice_data = {}, threshold=70):
-    """Reads CSV, finds matching rows, includes score, and returns as list of dicts."""
-    logging.info(f"Getting matching rows for file: {file_path} with invoice_data: {invoice_data}")
-    df = read_csv(file_path)
-    if df is None:
-        return [] # Return empty list if CSV reading failed
+def get_matching_rows(file_path, invoice_data={}, threshold=70):
+    """
+    Find matching rows in CSV file based on invoice data.
+    """
+    logger.info(f"Getting matching rows for file: {file_path} with invoice_data: {invoice_data}")
     
-    # Filter the df for the amount of the invoice.get('amount')
     try:
-        # we drop the df where the value is None or empty
-        df = df[df['amount'].notna()]
-        # we drop the df where the value is None or empty
-        df = df[df['amount'] != '']
-        # we drop the df where the value is None or empty
-        df = df[df['amount'] != 'None']
-        # then we convert column amount to float if the type is not float
-        df['amount'] = df['amount'].astype(float)
-
-        # also ensure that the invoice_data.get('amount') is a float
-        invoice_data['amount'] = float(invoice_data.get('amount'))
-
-        df = df[df['amount'] == invoice_data.get('amount')]
-    except:
-        logging.warning("Could not filter for amount, continuing...")
-        # return an empty dataframe with the same columns as the original dataframe
-        return pd.DataFrame(columns=df.columns).to_dict(orient='records')
-
-    matching_df = find_matching_rows(df, invoice_data, threshold)
-
-    # Convert results (including score) to list of dictionaries
-    results_list = matching_df.to_dict(orient='records')
-
-    # Ensure date is stringified if it's still a timestamp object and not NaT
-    for record in results_list:
-        if 'date' in record:
-            if pd.notna(record['date']) and isinstance(record['date'], pd.Timestamp):
-                 record['date'] = record['date'].strftime('%Y-%m-%d')
-            else: # Handle NaT or other non-timestamps by setting to None
-                 record['date'] = None
-        # Optional: Convert NaN amounts back to None for JSON friendliness
-        if 'amount' in record and pd.isna(record['amount']):
-            record['amount'] = None
-        # Optional: Convert NaN vendors/currencies back to None
-        if 'vendor' in record and pd.isna(record['vendor']):
-            record['vendor'] = None
-        if 'currency' in record and pd.isna(record['currency']):
-            record['currency'] = None
-
-
-    logging.info(f"Final matching rows results (count: {len(results_list)}): {results_list}")
-    return results_list # Returns list of matching rows (dicts), including the 'match_score'
+        # Read CSV file
+        logger.debug(f"Reading CSV file: {file_path}")
+        df = pd.read_csv(file_path)
+        
+        # Log DataFrame info before cleaning
+        logger.debug("CSV DataFrame head before cleaning:\n%s", df.head())
+        logger.debug("CSV DataFrame dtypes before cleaning:\n%s", df.dtypes)
+        
+        # Clean and convert data types
+        df['date'] = pd.to_datetime(df['date'], errors='coerce', infer_datetime_format=True)
+        df['amount'] = pd.to_numeric(df['amount'], errors='coerce')
+        
+        # Log DataFrame info after cleaning
+        logger.debug("CSV DataFrame head after cleaning:\n%s", df.head())
+        logger.debug("CSV DataFrame dtypes after cleaning:\n%s", df.dtypes)
+        
+        # Convert invoice date to datetime
+        invoice_date = pd.to_datetime(invoice_data.get('date'))
+        invoice_amount = float(invoice_data.get('amount', 0))
+        invoice_vendor = invoice_data.get('vendor', '').lower()
+        
+        logger.debug(f"Finding matching rows with invoice_data: {invoice_data}")
+        
+        if df.empty:
+            logger.warning("DataFrame is empty or None, cannot find matches.")
+            return []
+            
+        # Find matches based on criteria
+        matches = []
+        for _, row in df.iterrows():
+            # Calculate similarity score for vendor names
+            vendor_similarity = fuzz.ratio(row['vendor'].lower(), invoice_vendor)
+            
+            # Check if dates match exactly and amounts are within 0.01
+            date_match = row['date'].date() == invoice_date.date()
+            amount_match = abs(row['amount'] - invoice_amount) < 0.01
+            
+            # If all criteria match and similarity is above threshold
+            if date_match and amount_match and vendor_similarity >= threshold:
+                match_info = {
+                    'date': row['date'].strftime('%Y-%m-%d'),
+                    'amount': row['amount'],
+                    'currency': row['currency'],
+                    'vendor': row['vendor'],
+                    'source': row['source'],
+                    'match_score': vendor_similarity
+                }
+                matches.append(match_info)
+        
+        # Calculate and log confusion matrix
+        confusion_results = calculate_confusion_matrix(df, matches, invoice_data.get('source', ''))
+        if confusion_results:
+            logger.info("\n=== Confusion Matrix Results ===")
+            logger.info(f"True Positives: {confusion_results['counts']['true_positive']}")
+            logger.info(f"False Positives: {confusion_results['counts']['false_positive']}")
+            logger.info(f"True Negatives: {confusion_results['counts']['true_negative']}")
+            logger.info(f"False Negatives: {confusion_results['counts']['false_negative']}")
+            logger.info("\nPerformance Metrics:")
+            logger.info(f"Accuracy: {confusion_results['metrics']['accuracy']:.2f}%")
+            logger.info(f"Precision: {confusion_results['metrics']['precision']:.2f}%")
+            logger.info(f"Recall: {confusion_results['metrics']['recall']:.2f}%")
+            logger.info(f"F1-Score: {confusion_results['metrics']['f1_score']:.2f}%")
+            logger.info("============================\n")
+        
+        logger.info(f"Final matching rows results (count: {len(matches)}): {matches}")
+        return matches
+        
+    except Exception as e:
+        logger.error(f"Error in get_matching_rows: {str(e)}", exc_info=True)
+        return []
