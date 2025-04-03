@@ -5,7 +5,10 @@ import os
 import requests
 import time
 from typing import Dict, Any, List
-from ..config.settings import (
+import os
+from dotenv import load_dotenv
+
+from src.server.config.settings import (
     MISTRAL_API_KEY,
     MISTRAL_API_BASE_URL,
     MISTRAL_MODEL,
@@ -16,7 +19,20 @@ from ..config.settings import (
 )
 
 logger = logging.getLogger('ExtractData')
+"""
+load_dotenv()
 
+# Récupérer les valeurs des variables d'environnement
+MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
+print("================================ la cle aPI : ", MISTRAL_API_KEY)
+MISTRAL_API_BASE_URL = os.getenv("MISTRAL_API_BASE_URL")
+MISTRAL_MODEL = os.getenv("MISTRAL_MODEL")
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", 3))  # Valeur par défaut 3 si non définie
+REQUEST_TIMEOUT = float(os.getenv("REQUEST_TIMEOUT", 10.0))  # Valeur par défaut 10.0s
+MAX_TOKENS = int(os.getenv("MAX_TOKENS", 1000))  # Valeur par défaut 1000
+TEMPERATURE = float(os.getenv("TEMPERATURE", 0.7))  # Valeur par défaut 0.7
+logger = logging.getLogger('ExtractData')
+"""
 class MistralClient:
     def __init__(self, api_key: str = MISTRAL_API_KEY):
         self.api_key = api_key

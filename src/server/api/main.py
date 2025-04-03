@@ -1,9 +1,9 @@
-from .extract_data import get_extracted_data
-from .matching import get_matching_rows
-from .upload import upload_file
-from .download import download_file
-from .delete import delete_file
-from .benchmark import benchmark
+from src.server.api.extract_data import get_extracted_data
+from src.server.api.matching import get_matching_rows
+from src.server.api.upload import upload_file
+from src.server.api.download import download_file
+from src.server.api.delete import delete_file
+from src.server.api.benchmark import benchmark
 
 class APIService:
     def __init__(self):

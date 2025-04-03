@@ -1,7 +1,7 @@
 import streamlit as st
-from .payment_form import render_payment_form
-from .checkout_items import render_checkout_items
-from .preview_data import render_preview_data
+from src.client.modules.home.components.payment_form import render_payment_form
+from src.client.modules.home.components.checkout_items import render_checkout_items
+from src.client.modules.home.components.preview_data import render_preview_data
 
 def handle_threshold_change():
     if st.session_state.invoices_list:

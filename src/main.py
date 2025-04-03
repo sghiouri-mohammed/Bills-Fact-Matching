@@ -1,1 +1,1 @@
-from .client import main
+from src.client import main

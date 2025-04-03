@@ -1,1 +1,1 @@
-from .main import *
+from src.client.main import *

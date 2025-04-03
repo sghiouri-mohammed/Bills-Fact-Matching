@@ -2,7 +2,7 @@ import streamlit as st
 import os
 import time
 import logging
-from .results_display import display_results
+from src.client.modules.home.components.results_display import display_results
 import pandas as pd
         
 

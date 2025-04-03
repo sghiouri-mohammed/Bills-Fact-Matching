@@ -174,7 +174,7 @@ cython_debug/
 .pypirc
 
 # le folder storage
-./storage
+storage
 
 # Le Folder sample
-./sample
+sample

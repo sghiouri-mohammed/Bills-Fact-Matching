@@ -1,7 +1,7 @@
 import streamlit as st
 
-from .state import initialize_session_state
-from .components import file_upload, control_buttons, processing_logic, results_display
+from src.client.modules.home.state import initialize_session_state
+from src.client.modules.home.components import file_upload, control_buttons, processing_logic, results_display
 # Import AppService if needed directly by home_main, otherwise handled by session_state init
 # from src.server.main import AppService
 
