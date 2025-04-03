@@ -10,3 +10,5 @@ mistralai==0.0.10
 python-dateutil==2.8.2 
 scikit-learn
 dotenv
+matplotlib>=3.7.0
+seaborn>=0.12.2
