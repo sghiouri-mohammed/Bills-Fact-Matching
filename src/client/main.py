@@ -9,29 +9,44 @@ import logging
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# export main
 def main():
     # Set page config as the VERY FIRST Streamlit command
     st.set_page_config(layout="wide")
 
-    # Initialize session state (using the function from the home module component)
-    # Need to ensure AppService is available or passed if session_state.initialize needs it
-    # Checking session_state.py, it seems to instantiate AppService itself if needed.
-    # However, it's better practice to instantiate it once and potentially pass it around.
-    # For now, we rely on the home module's session state initialization.
+    # Initialize session state
+    if 'page' not in st.session_state:
+        st.session_state.page = "Home"
 
+    # Sidebar navigation
     st.sidebar.title("Navigation")
-    page = st.sidebar.selectbox("Select a page", ["Home", "Benchmark", "Pricing", "About"])
+    st.sidebar.markdown("<br>", unsafe_allow_html=True)
 
-    if page == "Home":
-        # Call the home page rendering function
+    # Navigation buttons
+    col1, col2, col3 = st.sidebar.columns([1, 6, 1])
+    with col2:
+        if st.button("🏠 Home", use_container_width=True):
+            st.session_state.page = "Home"
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("📊 Benchmark", use_container_width=True):
+            st.session_state.page = "Benchmark"
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("💰 Pricing", use_container_width=True):
+            st.session_state.page = "Pricing"
+        st.markdown("<br>", unsafe_allow_html=True)
+        
+        if st.button("ℹ️ About", use_container_width=True):
+            st.session_state.page = "About"
+
+    # Display the selected page
+    if st.session_state.page == "Home":
         home_main()
-    # Add other pages here if needed
-    elif page == "Benchmark":
+    elif st.session_state.page == "Benchmark":
         benchmark_main()
-    elif page == "Pricing":
+    elif st.session_state.page == "Pricing":
         pricing_main()
-    elif page == "About":
+    elif st.session_state.page == "About":
         about_main()
 
 if __name__ == "__main__":

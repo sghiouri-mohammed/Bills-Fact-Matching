@@ -19,8 +19,8 @@ class APIService:
     def upload_file(self, file_path, data):
         return upload_file(file_path, data)
     
-    def download_file(self, file_path, data):
-        return download_file(file_path, data)
+    def download_file(self, df, type='csv'):
+        return download_file(df, type)
     
     def delete_file(self, file_path):
         return delete_file(file_path)
