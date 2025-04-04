@@ -32,7 +32,7 @@ Le projet est organisé comme suit :
 │ │ └── ... # Autres modules serveur possibles <br>
 │ └── main.py # L'entrée principale du  fichier source <br>
 ├── storage # Le dossier temporaire pour upload les fichiers <br>
-├── init.py # Script principal / Point d'entrée de l'application Streamlit <br>
+├── main.py # Script principal / Point d'entrée de l'application Streamlit <br>
 ├── requirements.txt # Liste des dépendances Python du projet <br>
 ├── .venv/ # Environnement virtuel Python (créé localement) <br>
 └── README.md # Ce fichier d'information
@@ -96,7 +96,7 @@ Suivez ces étapes pour configurer et lancer le projet :
     ```
 
 5.  **Lancer l'application** :
-    Si vous utilisez Streamlit et que `init.py` est votre point d'entrée :
+    Si vous utilisez Streamlit et que `main.py` est votre point d'entrée :
     ```bash
     streamlit run main.py
     ```
