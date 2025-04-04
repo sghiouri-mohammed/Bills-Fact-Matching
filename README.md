@@ -124,6 +124,7 @@ Notre application utilise une technologie avancée de traitement d'images (OCR) 
 - Réduction des erreurs : notre algorithme identifie les correspondances avec précision<br>
 - Interface intuitive : simple glisser ou déposer de vos fichiers<br>
 - Visualisation claire des résultats et des correspondances trouvées<br>
+
 **Confidentialité**
-<br>
+
 Vos données financières restent confidentielles et ne sont pas stockées sur nos serveurs. Tout le traitement est effectué localement dans votre navigateur.
