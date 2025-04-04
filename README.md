@@ -2,7 +2,7 @@
 
 ## 👨‍💻 Développé par
 
-Ce projet a été réalisé dans le cadre d’un travail étudiant à **HETIC** par les membres du **Groupe 6** :
+Ce projet a été réalisé dans le cadre d’un projet PRO à **HETIC** par les membres du **Groupe 6** :
 
 - SOBGUI Ivan Joel  
 - OUMAR Ben Lol  
