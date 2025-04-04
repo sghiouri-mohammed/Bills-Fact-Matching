@@ -1,5 +1,20 @@
 # Projet d'Extraction de Données de Reçus par OCR
 
+## 👨‍💻 Développé par
+
+Ce projet a été réalisé dans le cadre d’un travail étudiant à **HETIC** par les membres du **Groupe 6** :
+
+- SOBGUI Ivan Joel  
+- OUMAR Ben Lol  
+- SGHIOURI Mohammed  
+- BOTI Armel Cyrille  
+- DIVENGI KIBANGUDI BUNKEMBO Nagui  
+
+## 🔗 Liens utiles
+- 💻 Application déployée : https://inovert.streamlit.app
+
+- 🧠 Code source sur GitHub : https://github.com/sghiouri-mohammed/Bills-Fact-Matching
+
 ## Objectif du Projet
 
 Ce projet vise à extraire automatiquement des informations clés à partir d'images de reçus ou de factures en utilisant la reconnaissance optique de caractères (OCR). Les informations extraites incluent typiquement la date, le montant total, la devise et le nom du vendeur. L'objectif est de simplifier la saisie de données ou la gestion des dépenses. Le script `src/server/extract_data.py` utilise le model Pixtral de Mistral qui contient le ``Computer Vision`` pour effectuer l'OCR et ensuite analyser le texte brut pour en extraire ces informations structurées.
