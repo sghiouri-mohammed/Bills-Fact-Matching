@@ -112,13 +112,17 @@ Cette application a été développée pour automatiser le processus de rapproch
 **Comment ça fonctionne ?**
 Notre application utilise une technologie avancée de traitement d'images (OCR) et des algorithmes de matching intelligents pour :
 
-- Extraire les données essentielles de vos factures au format image (JPG/PNG) : montants, dates, commerçants
-- Analyser votre relevé bancaire au format CSV
-- Établir automatiquement les correspondances entre chaque transaction bancaire et la facture associée
+- Extraire les données essentielles de vos factures au format image (JPG/PNG) : montants, dates, commerçants <br>
+- Analyser votre relevé bancaire au format CSV <br>
+- Établir automatiquement les correspondances entre chaque transaction bancaire et la facture associée <br>
+
 **Avantages**
-- Gain de temps considérable : quelques secondes suffisent pour traiter des dizaines de factures
-- Réduction des erreurs : notre algorithme identifie les correspondances avec précision
-- Interface intuitive : simple glisser ou déposer de vos fichiers
-- Visualisation claire des résultats et des correspondances trouvées
+<br>
+
+- Gain de temps considérable : quelques secondes suffisent pour traiter des dizaines de factures<br>
+- Réduction des erreurs : notre algorithme identifie les correspondances avec précision<br>
+- Interface intuitive : simple glisser ou déposer de vos fichiers<br>
+- Visualisation claire des résultats et des correspondances trouvées<br>
 **Confidentialité**
+<br>
 Vos données financières restent confidentielles et ne sont pas stockées sur nos serveurs. Tout le traitement est effectué localement dans votre navigateur.
