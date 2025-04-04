@@ -109,7 +109,8 @@ Suivez ces étapes pour configurer et lancer le projet :
 
 Cette application a été développée pour automatiser le processus de rapprochement entre les factures et les transactions bancaires, une tâche généralement chronophage et sujette aux erreurs lorsqu'elle est réalisée manuellement.
 
-**Comment ça fonctionne ?**
+**Comment ça fonctionne ?** <br>
+
 Notre application utilise une technologie avancée de traitement d'images (OCR) et des algorithmes de matching intelligents pour :
 
 - Extraire les données essentielles de vos factures au format image (JPG/PNG) : montants, dates, commerçants <br>
