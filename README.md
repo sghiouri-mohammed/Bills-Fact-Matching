@@ -11,7 +11,7 @@ Le projet est organisé comme suit :
 ├── src/ # Dossier contenant le code source principal <br>
 │ ├── client/ # Modules liés au client avec Streamlit  <br>
 │ ├── server/ # Modules liés au backend / logique métier <br>
-│ │ ├── init.py <br>
+│ │ ├── main.py <br>
 │ │ ├── extract_data.py # Logique d'extraction OCR via Nanonets <br>
 │ │ ├── config.py # Fichier pour stocker la clé API Nanonets <br>
 │ │ └── ... # Autres modules serveur possibles <br>
