@@ -7,7 +7,7 @@ from src.client.modules.home.components import file_upload, control_buttons, pro
 
 def main():
     # Removed st.set_page_config(layout="wide") from here
-    st.title("Matching Automatique de Factures avec OCR")
+    st.title("Matching Automatique de Factures avec Pixtral")
 
     # Initialize session state here, specific to the home page logic
     initialize_session_state() # This now correctly handles AppService instantiation internally

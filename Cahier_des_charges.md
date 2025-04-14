@@ -38,7 +38,7 @@ Développer une application automatisée pour :
 ### **4.1 Technologies Utilisées**
 - **Frontend :** Streamlit
 - **Backend :** Python
-- **OCR :** API Pixtral (powered by Mistral)
+- **Pixtral :** API Pixtral (powered by Mistral)
 - **Base de données :** Stockage en session
 
 ### **4.2 Le plus du projet**
@@ -107,7 +107,7 @@ Développer une application automatisée pour :
 - Mise en cache des résultats pour améliorer la performance.
 
 **Gestion des erreurs API avec stratégie de retry intelligente :**  
-En cas d’erreur lors d’un appel à l’API (ex. : OCR Mistral), le système applique une stratégie de tentative progressive :
+En cas d’erreur lors d’un appel à l’API (ex. : Pixtral Mistral), le système applique une stratégie de tentative progressive :
 - Une première tentative est effectuée normalement.
 - En cas d’échec, le système attend 5 secondes.
 - Une seconde tentative est lancée.
@@ -141,7 +141,7 @@ Souhaites-tu que je t’envoie la version complète du cahier des charges mise �
 ## **8. Risques et Mitigations**
 
 ### **8.1 Risques Identifiés**
-- **Limites de l'OCR** : Factures manuscrites ou mal structurées peuvent réduire l'efficacité de l'OCR.
+- **Limites de l'Pixtral** : Factures manuscrites ou mal structurées peuvent réduire l'efficacité de l'Pixtral.
 - **Performance de l'API** : Risque de lenteur ou d'échec de l'API Mistral.
 - **Complexité des Factures** : Certaines factures peuvent être difficiles à analyser.
 

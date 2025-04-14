@@ -9,7 +9,7 @@ def main():
 
         ### Comment ça fonctionne ?
 
-        Notre application utilise une technologie avancée de traitement d'images (OCR) et des algorithmes de matching intelligents pour :
+        Notre application utilise une technologie avancée de traitement d'images (Pixtral) et des algorithmes de matching intelligents pour :
 
         - **Extraire les données essentielles** de vos factures au format image (JPG/PNG) : montants, dates, commerçants
         - **Analyser votre relevé bancaire** au format CSV

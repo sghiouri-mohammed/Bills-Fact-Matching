@@ -1,4 +1,4 @@
-# Projet d'Extraction de Données de Reçus par OCR
+# Projet d'Extraction de Données de Reçus par Pixtral
 
 ## 👨‍💻 Développé par
 
@@ -17,7 +17,7 @@ Ce projet a été réalisé dans le cadre d’un projet PRO à **HETIC** par les
 
 ## Objectif du Projet
 
-Ce projet vise à extraire automatiquement des informations clés à partir d'images de reçus ou de factures en utilisant la reconnaissance optique de caractères (OCR). Les informations extraites incluent typiquement la date, le montant total, la devise et le nom du vendeur. L'objectif est de simplifier la saisie de données ou la gestion des dépenses. Le script `src/server/extract_data.py` utilise le model Pixtral de Mistral qui contient le ``Computer Vision`` pour effectuer l'OCR et ensuite analyser le texte brut pour en extraire ces informations structurées.
+Ce projet vise à extraire automatiquement des informations clés à partir d'images de reçus ou de factures en utilisant la reconnaissance optique de caractères (Pixtral). Les informations extraites incluent typiquement la date, le montant total, la devise et le nom du vendeur. L'objectif est de simplifier la saisie de données ou la gestion des dépenses. Le script `src/server/extract_data.py` utilise le model Pixtral de Mistral qui contient le ``Computer Vision`` pour effectuer l'Pixtral et ensuite analyser le texte brut pour en extraire ces informations structurées.
 
 ## Structure du Projet
 
@@ -27,7 +27,7 @@ Le projet est organisé comme suit :
 │ ├── client/ # Modules liés au client avec Streamlit  <br>
 │ ├── server/ # Modules liés au backend / logique métier <br>
 │ │ ├── main.py <br>
-│ │ ├── extract_data.py # Logique d'extraction OCR via Nanonets <br>
+│ │ ├── extract_data.py # Logique d'extraction Pixtral via Nanonets <br>
 │ │ ├── config.py # Fichier pour stocker la clé API Nanonets <br>
 │ │ └── ... # Autres modules serveur possibles <br>
 │ └── main.py # L'entrée principale du  fichier source <br>
@@ -72,7 +72,7 @@ Suivez ces étapes pour configurer et lancer le projet :
     ```bash
     pip install -r requirements.txt
     ```
-    *(Note : Assurez-vous que `requirements.txt` contient au moins `nanonets-ocr` et `streamlit` si vous utilisez Streamlit).*
+    *(Note : Assurez-vous que `requirements.txt` contient au moins `nanonets-Pixtral` et `streamlit` si vous utilisez Streamlit).*
 
 4.  **Configurer vos clés API et paramètres** :
     *   Changez le nom du fichier `.env.example` en `.env`.
@@ -111,7 +111,7 @@ Cette application a été développée pour automatiser le processus de rapproch
 
 **Comment ça fonctionne ?** <br>
 
-Notre application utilise une technologie avancée de traitement d'images (OCR) et des algorithmes de matching intelligents pour :
+Notre application utilise une technologie avancée de traitement d'images (Pixtral) et des algorithmes de matching intelligents pour :
 
 - Extraire les données essentielles de vos factures au format image (JPG/PNG) : montants, dates, commerçants <br>
 - Analyser votre relevé bancaire au format CSV <br>

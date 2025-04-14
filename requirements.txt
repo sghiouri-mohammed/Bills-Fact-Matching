@@ -1,4 +1,4 @@
-ocr-nanonets-wrapper
+Pixtral-nanonets-wrapper
 pandas>=2.0.0
 fuzzywuzzy>=0.18.0
 python-Levenshtein>=0.20.0

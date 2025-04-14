@@ -150,7 +150,7 @@ def get_extracted_data(image_path: str) -> Dict[str, Any]:
         
         if not raw_text:
             logger.warning(f"Mistral returned empty text for {image_path}")
-            return {"success": False, "error": "OCR returned no text", "data": None}
+            return {"success": False, "error": "Pixtral returned no text", "data": None}
 
         logger.debug(f"\n🔹 Raw extracted text:\n{raw_text}")
 
@@ -193,7 +193,7 @@ def get_extracted_data(image_path: str) -> Dict[str, Any]:
             return {"success": False, "error": "Failed to parse extracted data", "data": None}
         
     except Exception as e:
-        logger.error(f"Error during OCR extraction for {image_path}: {e}", exc_info=True)
+        logger.error(f"Error during Pixtral extraction for {image_path}: {e}", exc_info=True)
         return {"success": False, "error": str(e), "data": None}
 
 # Définir le chemin de base

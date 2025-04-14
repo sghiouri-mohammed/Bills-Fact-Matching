@@ -7,4 +7,4 @@ Analyse et retourne un JSON avec :
 - amount : montant exact de la facture (nombre décimal)
 - currency : devise de la facture (USD par défaut)
 - vendor : fusionne nom exact du vendeur et adresse du vendeur si disponible dans vendor
-Retourne uniquement le JSON. 
+Retourne uniquement le JSON.
